@@ -1,0 +1,49 @@
+class Solution {
+public:
+    int xorAfterQueries(vector<int>& nums, vector<vector<int>>& queries) {
+        const int MOD = 1e9 + 7;
+        int n = nums.size();
+
+      
+        unordered_map<int, vector<long long>> lazy;
+
+        for (auto &q : queries) {
+            int l = q[0], r = q[1], k = q[2], v = q[3];
+            if (!lazy.count(k)) lazy[k] = vector<long long>(n+1, 1);
+
+            lazy[k][l] = (lazy[k][l] * v) % MOD;
+            if (r + k < n) {
+                long long inv = modInverse(v, MOD);
+                lazy[k][r+k] = (lazy[k][r+k] * inv) % MOD;
+            }
+        }
+
+     
+        for (auto &[k, arr] : lazy) {
+            long long cur = 1;
+            for (int i = 0; i < n; i++) {
+                if (i % k == 0) cur = (cur * arr[i]) % MOD;
+                nums[i] = (nums[i] * cur) % MOD;
+            }
+        }
+
+        int result = 0;
+        for (int num : nums) result ^= num;
+        return result;
+    }
+
+    long long modInverse(long long a, long long m) {
+        
+        return modPow(a, m-2, m);
+    }
+
+    long long modPow(long long a, long long e, long long m) {
+        long long res = 1;
+        while (e) {
+            if (e & 1) res = (res * a) % m;
+            a = (a * a) % m;
+            e >>= 1;
+        }
+        return res;
+    }
+};
